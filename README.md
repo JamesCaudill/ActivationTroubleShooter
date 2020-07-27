@@ -1,7 +1,7 @@
 # ActivationTroubleShooter
 This is an attempt to help troubleshoot Activation issues with Office for Mac.
 
-This code was hosted on Microsoft TechNet Gallery, but that repository is being decomissioned. I have moved the code here for people to find it.  
+This code was hosted on Microsoft TechNet Gallery, but that repository is being decomissioned. I have moved the code here for people to find it.  Previously titled "Automation of the Steps in Microsoft KB 3025946".
 
 ## Previous Links
 
