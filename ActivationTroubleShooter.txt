@@ -1,0 +1,77 @@
+-- this is an automation of the steps to resolve the  
+-- Activation Error with Outlook for Mac for Office 365  
+ 
+-- steps in the article: http://community.office365.com/en-us/w/exchange/5867.outlook-for-mac-devices-known-issues.aspx  
+ 
+-- 1. Close all open Office applications including Outlook and OneNote. 
+-- 2. Click Go on the menu bar and select Utilities and then double-click Terminal. 
+-- 3. Type the following and then hit Enter in the Terminal Window: 
+ 
+-- killall “Office365ServiceV2” 
+ 
+-- Note - If you receive the message "No matching processes belonging to you were found" that will indicate the “Office365ServiceV2” service is not running and you can continue to step 4: 
+ 
+-- 4. In Terminal, type the following and hit enter: 
+ 
+-- cd ~/Library/Group\ Containers/UBF8T346G9.Office 
+ 
+-- 5. In Terminal, type the following and hit enter: 
+ 
+-- ls -a | perl -n -e 'print if m/^[e|c]|^(O4k)|^(Lic)\w/' | xargs rm 
+ 
+-- 6. Open Outlook or OneNote to see if you are able to sign in and activate successfully. 
+ 
+do shell script "logger -is ActivationScript: Started. " 
+do shell script "logger -is ActivationScript: Closing Outlook." 
+ 
+tell application "Microsoft Outlook" 
+    quit 
+end tell 
+ 
+ 
+-- Step one kill the licensing service 
+try 
+    do shell script "killall Office365ServiceV2" 
+    do shell script "logger -is ActivationScript: script killed the Office365ServiceV2 service." 
+on error errMsg --something failed 
+    do shell script "logger -is ActivationScript: script failed to kill the Office365ServiceV2 service. Error: " & errMsg 
+end try 
+ 
+-- Make sure directory  ~/Library/Group\ Containers/UBF8T346G9.Office exists 
+tell application "Finder" 
+    try 
+        set thePlistFilesDirectory to (path to home folder as text) & "Library:Group Containers:UBF8T346G9.Office:" 
+        if exists folder thePlistFilesDirectory then 
+            --check to see if there are files to move 
+            set response to do shell script "cd ~/Library/Group\\ Containers/UBF8T346G9.Office/;ls -a | perl -n -e 'print if m/^[e|c]|^(O4k)|^(Lic)\\w/'" 
+            --set response to do shell script "ls -a | perl -n -e 'print if m/^[e|c]|^(O4k)|^(Lic)\\w/'" -- | xargs -I % mv %  ~/Desktop/BackupData/" 
+            --do shell script "automated script moved .plist files for Office for Mac for Office 365 to ~/Desktop/BackupData/" 
+            if (count of response) > 0 then -- there are files to move 
+                --first check if destination directory is on the desktop already 
+                set thePlistBackupDirectory to (path to home folder as text) & "Desktop:BackupData:" 
+                if exists folder thePlistBackupDirectory then 
+                    do shell script "logger -is ActivationScript: ~/Desktop/BackupData/ directory already exists." 
+                else 
+                    --  Make the directory 
+                    do shell script "mkdir ~/Desktop/BackupData" 
+                    do shell script "logger -is ActivationScript: created directory ~/Desktop/BackupData/." 
+                end if 
+                -- run the command to find the .plist files. 
+                do shell script "cd ~/Library/Group\\ Containers/UBF8T346G9.Office/ ;ls -a | perl -n -e 'print if m/^[e|c]|^(O4k)|^(Lic)\\w/' | xargs -I % mv %   ~/Desktop/BackupData/" 
+                do shell script "logger -is ActivationScript: moved .plist files for Office for Mac for Office 365 to ~/Desktop/BackupData/" 
+                --log (count of response) 
+            else 
+                do shell script "logger -is ActivationScript: did not find plist files to move them." 
+            end if -- count is great than zero 
+        else 
+            do shell script "logger -is ActivationScript: failed to find the  ~/Library/Group Containers/UBF8T346G9.Office directory.  Can't move files." 
+        end if -- Plist Files Directory 
+    on error errMsg -- something failed 
+        do shell script "logger -is ActivationScript: Script encountered an error: " & errMsg 
+    end try 
+end tell -- Finder 
+ 
+--Now that the files are moved to the desktop restart Outlook. 
+ 
+do shell script "logger -is ActivationScript: Stopped. " 
+display dialog "Activation Troubleshooter completed.  Please attempt to activate Outlook." buttons {"Close"} default button "Close" with title "Activation Troubleshooter" 
