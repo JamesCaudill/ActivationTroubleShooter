@@ -16,3 +16,10 @@ Previous link to [Microsoft KB](https://support.microsoft.com/kb/3025946)
 ## Microsoft Outlook for Mac
 
 If you have isses using Outlook for Mac, attempt to use the Contact Support option as that will get you in contact with our team.  
+
+## License - MIT
+
+License
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+Licensed under the [MIT](LICENSE) License.
